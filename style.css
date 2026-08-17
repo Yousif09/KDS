@@ -7,33 +7,34 @@ body {
 
 .header {
     display: flex;
-    background-color:#8dc6ff; 
-    padding: 13px;
+    background-color:black;
+    padding: 10px;
     justify-content: space-between;
+
 }
 
 
 .open-orders {
     background-color: #dbd8e3;
-    display: flex;  
-    
-    
+    display: flex;
+
+
 }
 
 
 
 .done-orders {
     background-color: #dbd8e3;
-    display: flex; 
-    
-    
-    
-    
+    display: flex;
+
+
+
+
 }
 
 
 
 
 .settings-bar {
-  
+
 }
