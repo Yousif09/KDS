@@ -1,0 +1,14 @@
+{
+  "name": "kds",
+  "version": "1.0.0",
+  "description": "KDS (Kitchen Display System) for Taj Ali.",
+  "main": "script.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "type": "commonjs",
+  "dependencies": {
+    "express": "^5.2.1"
+  }
+}
