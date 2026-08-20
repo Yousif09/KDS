@@ -1,25 +1,16 @@
-const express = require('express');
+const express = require("express"); 
+const app = express(); 
+const cors = require('cors'); 
 
-const app = express();
 
-const allowedOrigins = ['https://yousif09.github.io/KDS/'];
+app.use(cors()); 
 
-app.use((req, res, next) => {
 
-  const origin = req.headers.origin;
 
-  if (allowedOrigins.includes(origin)) {
+app.get("/", (req, res) => {
 
-    res.header('Access-Control-Allow-Origin', origin);
-  }
+	res.json({name: "Taj Ali KDS"});
 
-  res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
+});
 
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
-
-  next();
-})
+app.listen('https://yousif09.github.io/KDS/', () => console.log("server running")); 
