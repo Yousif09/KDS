@@ -1,0 +1,60 @@
+
+:root {
+	/* responsive margins / paddings */
+	--margin-sm: 16px;
+	--margin-md: 32px;
+}
+
+html {
+	height: 100%;
+	font-size: 16px;
+}
+
+
+
+/* text utility classes */
+
+.text2 {
+	font-size: 12px;
+	font-weight: 400;
+	line-height: 1.333;
+}
+
+.text-black {
+	color: #1a1a1a;
+	font-size: 14px;
+	font-family: 'Roboto';
+	font-weight: 700;
+	line-height: 1.375;
+	letter-spacing: 0px;
+}
+
+.text1 {
+	color: #e8500a;
+	font-size: 12px;
+	font-family: 'Roboto';
+	font-style: normal;
+	font-weight: 700;
+	line-height: 1.333;
+	letter-spacing: 0px;
+}
+
+
+
+/* ui objects utility classes */
+
+.btn-light {
+	width: 24px; height: 24px;
+	display: flex;
+	background-color: #fff0e8;
+	padding: 4px 9px;
+	border-radius: 50%;
+}
+
+
+
+/* button hover utility classes */
+
+.hover-dark:hover {
+	filter: brightness(0.85);
+}

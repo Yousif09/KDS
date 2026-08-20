@@ -1,31 +1,89 @@
-
 <!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <title>Taj Ali KDS</title>
-	<link rel="stylesheet" href="style.css">
+<html>
+<head>
+  <meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="css/reset.css" />
+	<link rel="stylesheet" href="css/global.css" />
+	<link rel="stylesheet" href="css/order-card.css" />
 	<script src="script.js"></script>
-    </head>
 
-    <body>
+</head>
 
-        <div class="header">
+<body>
+<div class="order-card">
+	<header class="header">
+		<div class="header-order-info1">
+			<div class="header-order-info2">
+				<p class="header-text-order">Order #356789</p>
+				<p class="header-text-group">01:15 PM</p>
+			</div>
+			
+			<button class="btn-payment-badges hover-dark">
+				<div class="btn-payment-badges-icon">
+					<object data="assets/btn-payment-badges/btn-payment-badges-graphic.svg" class="btn-payment-badges-graphic" type="image/svg+xml"></object>
+				</div>
+				
+				<p class="btn-payment-badges-label">Paid</p>
+			</button>
+		</div>
+	</header>
+	
+	<div class="order-card-progress">
+		<div class="order-card-container1"></div>
+	</div>
+	
+	<p class="order-card-text">Dine in</p>
+	<button class="order-card-btn hover-dark text1">0/5</button>
+	
+	<div class="order-card-container2">
+		<div class="order-item-row order-item-row1">
+			<button class="order-item-row-btn-quantity text1 hover-dark btn-light">1</button>
+			
+			<div class="order-item-row-container">
+				<p class="order-item-row-title text-black">Beef Kebab Plate</p>
+				<p class="order-item-row-notes text2">No onions needed</p>
+				<p class="order-item-row-protein text2">Beef</p>
+			</div>
+		</div>
+		
+		<div class="order-item-row order-item-row2">
+			<button class="order-item-row-btn-quantity text1 btn-light hover-dark">1</button>
+			
+			<div class="order-item-row-container">
+				<p class="order-item-row-title text-black">Beef Kebab Plate</p>
+				<p class="order-item-row-notes text2">No onions needed</p>
+			</div>
+		</div>
+		
+		<div class="order-item-row order-item-row3">
+			<button class="order-item-row-btn-quantity text1 btn-light hover-dark">1</button>
+			
+			<div class="order-item-row-container">
+				<p class="order-item-row-title text-black">Beef Kebab Plate</p>
+				<p class="order-item-row-notes text2">Beef</p>
+			</div>
+		</div>
+		
+		<div class="order-item-row order-item-row4">
+			<button class="order-item-row-btn-quantity text1 btn-light hover-dark">1</button>
+			
+			<div class="order-item-row-container">
+				<p class="order-item-row-title text-black">Beef Kebab Plate</p>
+				<p class="order-item-row-notes text2">Beef</p>
+			</div>
+		</div>
+		
+		<div class="order-item-row order-item-row5">
+			<button class="order-item-row-btn-quantity text1 btn-light hover-dark">1</button>
+			
+			<div class="order-item-row-container">
+				<p class="order-item-row-title text-black">Beef Kebab Plate</p>
+			</div>
+		</div>
+	</div>
+</div>
 
-            <div class="open-orders">
-                Open
-            </div>
-
-
-            <div class="done-orders">
-                Done
-            </div>
-
-
-
-            </div>
-
-
-
-    </body>
+</body>
 </html>
