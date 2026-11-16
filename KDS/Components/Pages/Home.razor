@@ -24,6 +24,7 @@
             </div>
 
             <div class="order-body">
+
                 @foreach (var item in CurrentOrder.items)
                 {
                     <div class="order-item">
@@ -56,6 +57,7 @@
 
 
     private OrderCard? CurrentOrder;
+    private OrderCard? AnotherOrder; 
     private System.Timers.Timer? _timer;
     private string TotalTime = "0:00";
 
@@ -70,11 +72,30 @@
             items = new List<OrderItem>
         {
                 new OrderItem {quantity = 2, name="Chicken Shawarma Over Rice", modifiers = new List<string> {"No onions"}},
-                new OrderItem {quantity = 1, name="Falafel Sandwich", modifiers = new List<string> {"spicy"}}
+                new OrderItem {quantity = 1, name="Falafel Sandwich", modifiers = new List<string> {"spicy"}},
+                new OrderItem {quantity = 1, name="Greek Salad"},
+                new OrderItem {quantity = 1, name="Lentil Soup"}
+
+            }
+        };
+
+
+        AnotherOrder = new OrderCard
+        {
+            time = DateTime.Now.AddMinutes(-2).AddSeconds(-15),
+            service = "To Go",
+            orderStatus = OrderStatus.inProgress,
+            items = new List<OrderItem>
+        {
+                new OrderItem {quantity = 2, name="Beef Shawarma Sanwdwich", modifiers = new List<string> {"No onions"}},
+                new OrderItem {quantity = 1, name="Dolmas 4pc", }
 
 
             }
         };
+
+
+      
 
         UpdateTimerDisplay();
         _timer = new System.Timers.Timer(1000);
@@ -120,6 +141,7 @@
 
 
 
+    // disposing of the memory allocated from the timer object. 
     public void Dispose()
     {
         _timer?.Dispose();
