@@ -1,31 +1,128 @@
 ﻿@page "/"
+@rendermode InteractiveServer
+@implements IDisposable // this removes the order card when its done
 
 <PageTitle>Home</PageTitle>
 
 
+@if (CurrentOrder != null)
+{
 
-<div> 
+    <div class="order-card">
+
+        <div class="order-header">
+
+        <span class="service-type">@CurrentOrder.service?</span>
+        <span class="order-timer">@TotalTime</span>
+        </div>
+
+        <div class="order-body">
+            @foreach (var item in CurrentOrder.items)
+            {
+                <div class="order-item">
+                    <div class="item-main">
+                        <span class="item-qty">@(item.quantity) </span>
+                        <span class="item-name">@item.name</span>
+                    </div>
+
+                    @if (item.modifiers.Any())
+                    {
+                        <ul class="item-modifiers">
+                            @foreach(var modifier in item.modifiers)
+                            {
+                                <li> @modifier</li>
+                            }
+                        </ul>
+                    }
+                </div>
+            }
+        </div>
+    </div>
 
 
-
-</div>
-
-
-
-
-
+}
 
 @code {
 
 
-    // represents a single order card that will pop up on the menu. 
-    private class orderCard
+    private OrderCard? CurrentOrder;
+    private System.Timers.Timer? _timer;
+    private string TotalTime = "0:00";
+
+    protected override void OnInitialized()
     {
-        public DateTime time {get; set;}
-        public string? service {get; set;}
-        public string? item {get; set;}
-        public int itemCount {get; set;}
+        // SIMPLY DUMMY DATA:
+        CurrentOrder = new OrderCard
+        {
+            time = DateTime.Now.AddMinutes(-2).AddSeconds(-15), 
+            service = "Dine In",
+            orderStatus = OrderStatus.inProgress,
+            items = new List<OrderItem>
+        {
+                new OrderItem {quantity = 2, name="Chicken Shawarma Over Rice", modifiers = new List<string> {"No onions"}}
+            }
+        };
+
+        UpdateTimerDisplay();
+        _timer = new System.Timers.Timer(1000);
+        _timer.Elapsed += ElapsedTimer;
+        _timer.Start();
     }
 
 
+
+    private void ElapsedTimer(object? sender, System.Timers.ElapsedEventArgs e)
+    {
+        UpdateTimerDisplay();
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void UpdateTimerDisplay()
+    {
+
+        if(CurrentOrder == null)
+        {
+            return; 
+        } else
+        {
+            var span = DateTime.Now - CurrentOrder.time;
+            TotalTime = $"{(int)span.TotalMinutes}:{span.Seconds:D2}";
+        }
+    }
+
+    public void Dispose()
+    {
+        _timer?.Dispose();
+    }
+
+    // represents a single order card that will pop up on the menu. 
+    public class OrderCard
+    {
+        public DateTime time {get; set;}
+        public string? service {get; set;} // to go or dine in..
+        public OrderStatus orderStatus {get; set;}
+        public List<OrderItem> items { get; set; } = new();  // a list of our order items
+        public int itemCount {get; set;}
+    }
+
+    // class that represents a singular order item and what it will compose of
+    public class OrderItem
+    {
+        public int quantity {get; set;}
+        public string? name {get; set;}
+        public List<string> modifiers { get; set; } = new(); // no tomatoes/onions .. etc
+        public bool isComplete {get; set;} // is the order complete or not, if so action the button
+    }
+
+
+    // Enum to determine the status of an order
+    public enum OrderStatus
+    {
+        inProgress,
+        ready
+    }
+
+    
+
+    
 }
