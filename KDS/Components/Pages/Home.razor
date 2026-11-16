@@ -1,45 +1,55 @@
 ﻿@page "/"
 @rendermode InteractiveServer
-@implements IDisposable // this removes the order card when its done
+@implements IDisposable // disposes of memory that needs to be closed
 
 <PageTitle>Home</PageTitle>
 
 
+
+@* If our current order is NOT null, AND if our order is showing then display all that info.
+    Otherwise, showOrder is set to false and nothing appears on that conditional case.
+*@
 @if (CurrentOrder != null)
 {
+    if (showOrder)
+    {
 
-    <div class="order-card">
+        <div class="order-card">
 
-        <div class="order-header">
+            <div class="order-header">
 
-        <span class="service-type">@CurrentOrder.service?</span>
-        <span class="order-timer">@TotalTime</span>
-        </div>
+                <span class="service-type">@CurrentOrder.service</span>
+                <span class="order-timer">@TotalTime</span>
+                <button class="order-button" @onclick="CompleteOrder">Done</button>
+            </div>
 
-        <div class="order-body">
-            @foreach (var item in CurrentOrder.items)
-            {
-                <div class="order-item">
-                    <div class="item-main">
-                        <span class="item-qty">@(item.quantity) </span>
-                        <span class="item-name">@item.name</span>
+            <div class="order-body">
+                @foreach (var item in CurrentOrder.items)
+                {
+                    <div class="order-item">
+                        <div class="item-main">
+                            <span class="item-qty">(@(item.quantity)) </span>
+                            <span class="item-name">@item.name</span>
+                        </div>
+
+
+
+                        @if (item.modifiers.Any())
+                        {
+                            <ul class="item-modifiers">
+                                @foreach (var modifier in item.modifiers)
+                                {
+                                    <li> @modifier</li>
+                                }
+                            </ul>
+                        }
                     </div>
-
-                    @if (item.modifiers.Any())
-                    {
-                        <ul class="item-modifiers">
-                            @foreach(var modifier in item.modifiers)
-                            {
-                                <li> @modifier</li>
-                            }
-                        </ul>
-                    }
-                </div>
-            }
+                }
+            </div>
         </div>
-    </div>
 
 
+    }
 }
 
 @code {
@@ -59,7 +69,10 @@
             orderStatus = OrderStatus.inProgress,
             items = new List<OrderItem>
         {
-                new OrderItem {quantity = 2, name="Chicken Shawarma Over Rice", modifiers = new List<string> {"No onions"}}
+                new OrderItem {quantity = 2, name="Chicken Shawarma Over Rice", modifiers = new List<string> {"No onions"}},
+                new OrderItem {quantity = 1, name="Falafel Sandwich", modifiers = new List<string> {"spicy"}}
+
+
             }
         };
 
@@ -77,6 +90,21 @@
         InvokeAsync(StateHasChanged);
     }
 
+
+
+
+    private bool showOrder = true;
+    /*
+     * Method to remove an order off the screen when someone clicks the "Done" button 
+     */
+     private void CompleteOrder()
+    {
+        showOrder = false;
+    }
+
+
+
+    // timer method
     private void UpdateTimerDisplay()
     {
 
@@ -89,6 +117,8 @@
             TotalTime = $"{(int)span.TotalMinutes}:{span.Seconds:D2}";
         }
     }
+
+
 
     public void Dispose()
     {
