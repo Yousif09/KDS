@@ -83,5 +83,5 @@ C:\Users\Yousif\Desktop\Projects\KDS\KDS\obj\Debug\net10.0\KDS.genruntimeconfig.
 C:\Users\Yousif\Desktop\Projects\KDS\KDS\obj\Debug\net10.0\ref\KDS.dll
 C:\Users\Yousif\Desktop\Projects\KDS\KDS\obj\Debug\net10.0\compressed\387wiu80tv-{0}-khy4lop6wu-khy4lop6wu.gz
 C:\Users\Yousif\Desktop\Projects\KDS\KDS\obj\Debug\net10.0\scopedcss\Components\Pages\Home.razor.rz.scp.css
-C:\Users\Yousif\Desktop\Projects\KDS\KDS\obj\Debug\net10.0\compressed\iq7gcq4frt-{0}-t3tiwdkm58-t3tiwdkm58.gz
-C:\Users\Yousif\Desktop\Projects\KDS\KDS\obj\Debug\net10.0\compressed\w0rzb1om5d-{0}-t3tiwdkm58-t3tiwdkm58.gz
+C:\Users\Yousif\Desktop\Projects\KDS\KDS\obj\Debug\net10.0\compressed\iq7gcq4frt-{0}-kw2ysizl2s-kw2ysizl2s.gz
+C:\Users\Yousif\Desktop\Projects\KDS\KDS\obj\Debug\net10.0\compressed\w0rzb1om5d-{0}-kw2ysizl2s-kw2ysizl2s.gz

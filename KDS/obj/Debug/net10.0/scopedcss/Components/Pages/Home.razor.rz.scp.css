@@ -29,6 +29,7 @@
 
 
 
+
 .order-body[b-qn2v54m6fw] {
     padding: 20px;
     flex-grow: 1;
@@ -70,3 +71,10 @@
 }
 
 
+.orders-grid[b-qn2v54m6fw] {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    padding: 1rem;
+    align-items: flex-start;
+}

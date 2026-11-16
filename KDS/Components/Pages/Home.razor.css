@@ -29,6 +29,7 @@
 
 
 
+
 .order-body {
     padding: 20px;
     flex-grow: 1;
@@ -70,3 +71,10 @@
 }
 
 
+.orders-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    padding: 1rem;
+    align-items: flex-start;
+}
