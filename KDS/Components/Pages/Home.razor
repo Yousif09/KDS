@@ -1,6 +1,7 @@
 ﻿@page "/"
 @rendermode InteractiveServer
 @implements IDisposable // disposes of memory that needs to be closed
+@inject CloverServer CloverService
 
 <PageTitle>Home</PageTitle>
 
@@ -57,45 +58,15 @@
 
 
     private OrderCard? CurrentOrder;
-    private OrderCard? AnotherOrder; 
     private System.Timers.Timer? _timer;
     private string TotalTime = "0:00";
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        // SIMPLY DUMMY DATA:
-        CurrentOrder = new OrderCard
-        {
-            time = DateTime.Now.AddMinutes(-2).AddSeconds(-15), 
-            service = "Dine In",
-            orderStatus = OrderStatus.inProgress,
-            items = new List<OrderItem>
-        {
-                new OrderItem {quantity = 2, name="Chicken Shawarma Over Rice", modifiers = new List<string> {"No onions"}},
-                new OrderItem {quantity = 1, name="Falafel Sandwich", modifiers = new List<string> {"spicy"}},
-                new OrderItem {quantity = 1, name="Greek Salad"},
-                new OrderItem {quantity = 1, name="Lentil Soup"}
-
-            }
-        };
 
 
-        AnotherOrder = new OrderCard
-        {
-            time = DateTime.Now.AddMinutes(-2).AddSeconds(-15),
-            service = "To Go",
-            orderStatus = OrderStatus.inProgress,
-            items = new List<OrderItem>
-        {
-                new OrderItem {quantity = 2, name="Beef Shawarma Sanwdwich", modifiers = new List<string> {"No onions"}},
-                new OrderItem {quantity = 1, name="Dolmas 4pc", }
+        CurrentOrder = await CloverService.GetLatestOrder(); 
 
-
-            }
-        };
-
-
-      
 
         UpdateTimerDisplay();
         _timer = new System.Timers.Timer(1000);
@@ -132,11 +103,16 @@
         if(CurrentOrder == null)
         {
             return; 
-        } else
-        {
-            var span = DateTime.Now - CurrentOrder.time;
-            TotalTime = $"{(int)span.TotalMinutes}:{span.Seconds:D2}";
         }
+
+        var timeSpan = DateTimeOffset.UtcNow - CurrentOrder.time;
+
+        if(timeSpan.TotalSeconds < 0)
+        {
+            timeSpan = TimeSpan.Zero;
+        }
+
+        TotalTime = $"{(int)timeSpan.TotalMinutes}:{timeSpan.Seconds:D2}";
     }
 
 
@@ -150,7 +126,7 @@
     // represents a single order card that will pop up on the menu. 
     public class OrderCard
     {
-        public DateTime time {get; set;}
+        public DateTimeOffset time {get; set;}
         public string? service {get; set;} // to go or dine in..
         public OrderStatus orderStatus {get; set;}
         public List<OrderItem> items { get; set; } = new();  // a list of our order items
@@ -174,7 +150,38 @@
         ready
     }
 
-    
+
+
+    // clovers response: 
+    public class CloverResponse
+    {
+        public List<CloverOrder>Elements {get; set;} = new();
+    }
+
+    public class CloverOrder
+    {
+        public long createdTime {get; set;}
+        public CloverOrderType? orderType {get; set;}
+        public CloverLineItems? lineItems {get; set;}
+
+    }
+
+    public class CloverOrderType
+    {
+        public string? label { get; set; }
+    }
+
+    public class CloverLineItems
+    {
+        public List<CloverLineItem> Elements {get; set;} = new(); 
+    }
+
+    public class CloverLineItem
+    {
+        public string? name { get; set; }
+        public string? note {get; set;} // any notes
+        public int? unitQty {get; set;} 
+    }
 
     
 }

@@ -1,10 +1,17 @@
 using KDS.Components;
+using System.Net.Http.Headers;
+using System.Net.Http.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
+
+// registering the clover service here: 
+builder.Services.AddHttpClient<CloverServer>();
+
 
 var app = builder.Build();
 
