@@ -38,7 +38,7 @@ public class CloverServer
             return null;
         }
 
-        return new Home.OrderCard
+        var orderCard = new Home.OrderCard
         {
             time = DateTimeOffset.FromUnixTimeMilliseconds(latestOrder.createdTime),
             service = latestOrder.orderType?.label ?? "Dine in",
@@ -46,15 +46,42 @@ public class CloverServer
             items = new List<Home.OrderItem>()
         };
 
-        if(latestOrder.LineItems?.Elements != null)
+        if(latestOrder.lineItems?.Elements != null)
         {
             foreach(var lineItem in latestOrder.lineItems.Elements)
             {
                 int qty = 1;
                 // meaning we have an actual item to display:
                 if (lineItem.unitQty != null && lineItem.unitQty > 0)
+                {
+                    qty = lineItem.unitQty.Value / 1000; 
+                }
+
+                //checking for a duplicate:
+                var existingItem = orderCard.items.FirstOrDefault(i =>
+                i.name == lineItem.name && i.modifiers.FirstOrDefault() == lineItem.note);
+
+
+                if(existingItem != null)
+                {
+                    existingItem.quantity += qty; 
+                } else
+                {
+                    var newItem = new Home.OrderItem
+                    {
+                        name = lineItem.name,
+                        quantity = qty
+                    }; 
+
+                    if(!string.IsNullOrWhiteSpace(lineItem.note))
+                    {
+                        newItem.modifiers.Add(lineItem.note);
+                    }
+                    orderCard.items.Add(newItem); 
+                }
             }
         }
+        return orderCard;
     }
 
 }
