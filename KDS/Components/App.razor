@@ -6,17 +6,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <base href="/" />
     <ResourcePreloader />
-    <link rel="stylesheet" href="@Assets["lib/bootstrap/dist/css/bootstrap.min.css"]" />
+    <link rel="stylesheet" href="@Assets["css/fonts.css"]" />
+    <link rel="stylesheet" href="@Assets["css/reset.css"]" />
+    <link rel="stylesheet" href="@Assets["css/global.css"]" />
+    <link rel="stylesheet" href="@Assets["css/sidebar.css"]" />
+    <link rel="stylesheet" href="@Assets["css/board.css"]" />
+    <link rel="stylesheet" href="@Assets["css/order-card.css"]" />
+    <link rel="stylesheet" href="@Assets["css/item-row.css"]" />
+    <link rel="stylesheet" href="@Assets["css/history.css"]" />
+    <link rel="stylesheet" href="@Assets["css/settings.css"]" />
     <link rel="stylesheet" href="@Assets["app.css"]" />
     <link rel="stylesheet" href="@Assets["KDS.styles.css"]" />
     <ImportMap />
     <link rel="icon" type="image/png" href="favicon.png" />
-    <HeadOutlet />
+    <HeadOutlet @rendermode="InteractiveServer" />
 </head>
 
 <body>
-    <Routes />
+    @* the whole app is interactive so the sidebar and top bar update live too *@
+    <Routes @rendermode="InteractiveServer" />
     <ReconnectModal />
+    <script src="@Assets["js/kds.js"]"></script>
     <script src="@Assets["_framework/blazor.web.js"]"></script>
 </body>
 

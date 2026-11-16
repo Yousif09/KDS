@@ -1,0 +1,294 @@
+.order-card {
+	box-shadow: 0px 1px 4px 0px rgba(0, 0, 0, 0.04),0px 4px 24px 0px rgba(0, 0, 0, 0.08);
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	font-family: var(--font);
+	letter-spacing: 0px;
+	background-color: #fff;
+	border-radius: 18px;
+	overflow: hidden;
+	transition: box-shadow 0.2s ease;
+}
+
+/* new order */
+.order-card.is-new {
+	animation: card-in 0.4s ease-out;
+}
+
+@keyframes card-in {
+	from { opacity: 0; transform: translateY(-12px) scale(0.98); }
+	to   { opacity: 1; transform: none; }
+}
+
+.header {
+	background-color: var(--brand);
+	padding: 16px 20px;
+	transition: background-color 0.3s ease;
+}
+
+/* age states */
+.order-card.is-warning .header { background-color: var(--warning); }
+.order-card.is-late .header    { background-color: var(--late); }
+.order-card.is-late            { animation: late-pulse 1.6s ease-in-out infinite; }
+
+@keyframes late-pulse {
+	0%, 100% { box-shadow: 0 0 0 0 rgba(198, 40, 40, 0.0), 0px 4px 24px 0px rgba(0, 0, 0, 0.08); }
+	50%      { box-shadow: 0 0 0 4px rgba(198, 40, 40, 0.35), 0px 4px 24px 0px rgba(0, 0, 0, 0.08); }
+}
+
+/* all items done */
+.order-card.is-complete .header { background-color: var(--done); }
+.order-card.is-complete { animation: none; }
+
+.header-order-info1 {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 6px;
+}
+
+
+/* btn-payment-badges */
+
+.btn-payment-badges {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 6px;
+	color: var(--done);
+	font-size: calc(12px * var(--text-scale));
+	font-style: normal;
+	font-weight: 500;
+	line-height: 1.333;
+	letter-spacing: 0px;
+	text-align: unset;
+	background-color: var(--done-light);
+	padding: 4px 10px;
+	border: 1px solid #a5d6a7;
+	border-radius: 999px;
+	cursor: default;
+}
+
+.btn-payment-badges-icon {
+	position: relative;
+	width: 12px; height: 12px;
+	flex-shrink: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background-color: rgba(46, 125, 50, 0.12);
+	border: 1px solid var(--done);
+	border-radius: 50%;
+	overflow: hidden;
+}
+
+.btn-payment-badges-graphic {
+	width: 6px; height: 5px;
+}
+
+.btn-payment-badges-label {
+	text-align: center;
+}
+
+
+.header-badges {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+
+/* order type tag */
+.order-type-tag {
+	padding: 3px 10px;
+	font-size: calc(12px * var(--text-scale));
+	font-weight: 900;
+	line-height: 1.333;
+	letter-spacing: 0.6px;
+	text-transform: uppercase;
+	color: #fff;
+	background-color: #555;
+	border: 1px solid rgba(255, 255, 255, 0.6);
+	border-radius: 999px;
+}
+
+.order-type-pickup   { background-color: #1565c0; }
+.order-type-takeout  { background-color: #6a1b9a; }
+.order-type-delivery { background-color: #00796b; }
+.order-type-dinein   { background-color: #37474f; }
+
+/* unpaid variant */
+.btn-payment-badges.is-unpaid {
+	color: var(--late);
+	background-color: #ffebee;
+	border-color: #ef9a9a;
+}
+
+.btn-payment-badges.is-unpaid .btn-payment-badges-icon {
+	background-color: rgba(198, 40, 40, 0.12);
+	border-color: var(--late);
+}
+/* end btn-payment-badges*/
+
+
+.header-order-info2 {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	align-self: stretch;
+	color: #fff;
+}
+
+.header-text-order {
+	font-size: calc(16px * var(--text-scale));
+	font-weight: 700;
+	line-height: 1.5;
+	letter-spacing: -0.4px;
+	text-align: left;
+}
+
+.header-text-group {
+	opacity: 0.7;
+	font-size: calc(12px * var(--text-scale));
+	font-weight: 500;
+	line-height: 1.333;
+	text-align: left;
+}
+
+/* timer */
+.header-timer {
+	margin-left: auto;
+	padding: 2px 8px;
+	font-size: calc(14px * var(--text-scale));
+	font-weight: 700;
+	font-variant-numeric: tabular-nums;
+	background-color: rgba(0, 0, 0, 0.18);
+	border-radius: 999px;
+}
+
+.order-card-progress {
+	background-color: #f0f0f0;
+}
+
+.order-card-container1 {
+	width: 0; height: 3px;
+	background-color: var(--brand);
+	transition: width 0.25s ease, background-color 0.25s ease;
+}
+
+.order-card.is-complete .order-card-container1 {
+	background-color: var(--done);
+}
+
+.order-card-text {
+	flex-shrink: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	padding: 12px 20px;
+	border-bottom: 1px solid var(--line);
+}
+
+.order-card-customer {
+	color: var(--text);
+	font-size: calc(14px * var(--text-scale));
+	font-weight: 700;
+	line-height: 1.429;
+}
+
+.order-card-note {
+	color: var(--late);
+	font-size: calc(12px * var(--text-scale));
+	font-weight: 700;
+	line-height: 1.333;
+}
+
+.order-card-btn {
+	margin-left: 20px; margin-top: 12px;
+	min-width: 36px;
+	min-height: 20px;
+	display: flex;
+	justify-content: center;
+	flex-shrink: 0;
+	align-self: start;
+	background-color: var(--brand-light);
+	padding: 2px 8px;
+	border-radius: 999px;
+}
+
+.order-card.is-complete .order-card-btn {
+	color: var(--done);
+	background-color: var(--done-light);
+}
+
+.order-card-container2 {
+	margin: 16px 17px 0 20px;
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+/* bump button */
+.order-card-bump {
+	margin: 16px 20px 20px;
+	padding: 12px;
+	font-size: calc(14px * var(--text-scale));
+	font-weight: 700;
+	color: var(--text);
+	background-color: #f0f0f0;
+	border-radius: 12px;
+	transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.order-card.is-complete .order-card-bump {
+	color: #fff;
+	background-color: var(--done);
+}
+
+
+/* remote selection */
+.order-card[data-selected] {
+	outline: 2px solid var(--cursor);
+	outline-offset: 4px;
+}
+
+
+.order-card[data-cursor] {
+	outline-width: 4px;
+}
+
+
+.order-item-row[data-cursor] {
+	background-color: var(--brand-light);
+	outline: 3px solid var(--brand);
+	outline-offset: 4px;
+	border-radius: 4px;
+}
+
+.order-item-row[data-cursor].is-done {
+	opacity: 0.75;
+}
+
+/* remote hint */
+.remote-hint {
+	position: fixed;
+	left: 50%;
+	bottom: 24px;
+	transform: translateX(-50%);
+	z-index: 30;
+	padding: 10px 20px;
+	font-family: var(--font);
+	font-size: 15px;
+	font-weight: 500;
+	color: #fff;
+	white-space: nowrap;
+	background-color: rgba(26, 26, 26, 0.92);
+	border-radius: 999px;
+	box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+	pointer-events: none;
+}
+
+@media (max-width: 600px) {
+	.remote-hint { font-size: 12px; bottom: 16px; }
+}

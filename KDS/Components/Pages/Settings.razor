@@ -1,15 +1,391 @@
 ﻿@page "/settings"
-@rendermode InteractiveServer
+@implements IAsyncDisposable
+@inject KitchenService Kitchen
+@inject ScreenSettingsService Screen
+@inject IJSRuntime JS
 
+<PageTitle>Settings · Kitchen Display</PageTitle>
 
+@*
+ * Clover + kitchen data are shared by every screen (server side).
+ * Everything else is saved per screen in the browser.
+ *@
 
+<section class="view settings">
+
+    @* Clover *@
+    <div class="settings-section">
+        <div class="settings-section-head">
+            <h2 class="settings-label">Clover</h2>
+            <span class="btn-payment-badges clover-badge is-@CloverClass">
+                <span class="btn-payment-badges-icon">
+                    @if (Kitchen.Status == CloverStatus.Live)
+                    {
+                        <svg class="btn-payment-badges-graphic" viewBox="0 0 7 5" fill="none" aria-hidden="true">
+                            <path d="M0.6 2.31L2.31 4.03L5.74 0.6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                    }
+                    else if (Kitchen.Status == CloverStatus.Error)
+                    {
+                        <svg class="btn-payment-badges-graphic" viewBox="0 0 6 6" fill="none" aria-hidden="true">
+                            <path d="M1 1L5 5M5 1L1 5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+                        </svg>
+                    }
+                </span>
+                <span class="btn-payment-badges-label">@CloverBadge</span>
+            </span>
+        </div>
+
+        <div class="settings-group">
+            @if (Kitchen.Status == CloverStatus.Demo)
+            {
+                <div class="settings-row">
+                    <span class="settings-row-text">
+                        <span class="settings-row-title text-black">Not connected</span>
+                        <span class="settings-row-desc text2">
+                            Add <span class="settings-code">Clover:MerchantId</span> and <span class="settings-code">Clover:ApiToken</span>
+                            to the server's config (user secrets or appsettings), then restart. Until then the board shows test orders.
+                        </span>
+                    </span>
+                </div>
+            }
+            else
+            {
+                <div class="settings-row">
+                    <span class="settings-row-text">
+                        <span class="settings-row-title text-black">@Kitchen.MerchantId</span>
+                        <span class="settings-row-desc text2">Sandbox · API token · checks for new orders every 10 sec</span>
+                    </span>
+                </div>
+                <div class="settings-row">
+                    <span class="settings-row-text">
+                        <span class="settings-row-title text-black">Last checked</span>
+                        @if (Kitchen.Status == CloverStatus.Error)
+                        {
+                            <span class="settings-error text2">@Kitchen.StatusMessage</span>
+                        }
+                    </span>
+                    <span class="text2">@(Kitchen.LastSync is { } t ? Screen.Clock(t) : "Not yet")</span>
+                </div>
+            }
+        </div>
+    </div>
+
+    @* Accessibility *@
+    <div class="settings-section">
+        <h2 class="settings-label">Accessibility</h2>
+        <div class="settings-group">
+            <div class="settings-row">
+                <span class="settings-row-text">
+                    <span class="settings-row-title text-black" id="lbl-text-size">Text size</span>
+                    <span class="settings-row-desc text2">Order cards and past orders</span>
+                </span>
+                <span class="pill-group" role="radiogroup" aria-labelledby="lbl-text-size">
+                    @foreach (var (scale, label) in TextSizes)
+                    {
+                        <label>
+                            <input class="sr-only" type="radio" name="textScale" checked="@(Screen.Current.TextScale == scale)" @onchange="() => SetTextScale(scale)" />
+                            <span class="pill">@label</span>
+                        </label>
+                    }
+                </span>
+            </div>
+
+            <SettingToggle Title="High contrast" Description="Darker text and borders"
+                           @bind-Value="Screen.Current.HighContrast" @bind-Value:after="Save" />
+            <SettingToggle Title="Timer labels" Description="Shows SOON and LATE next to the timer, not just a color"
+                           @bind-Value="Screen.Current.StatusLabels" @bind-Value:after="Save" />
+            <SettingToggle Title="Reduce motion" Description="No pulsing or sliding cards"
+                           @bind-Value="Screen.Current.ReduceMotion" @bind-Value:after="Save" />
+            <SettingToggle Title="Dark background" Description="Behind the order cards"
+                           @bind-Value="Screen.Current.DarkBoard" @bind-Value:after="Save" />
+        </div>
+    </div>
+
+    @* Remote *@
+    <div class="settings-section">
+        <h2 class="settings-label">Remote</h2>
+        <div class="settings-group">
+            <SettingToggle Title="Remote control" Description="Select and bump orders with a remote, bump bar or clicker"
+                           @bind-Value="Screen.Current.RemoteEnabled" @bind-Value:after="Save" />
+            <SettingToggle Title="Button hints" Description="Shows what OK will do at the bottom of the screen"
+                           @bind-Value="Screen.Current.RemoteHints" @bind-Value:after="Save" />
+
+            <div class="settings-row">
+                <span class="settings-row-text">
+                    <span class="settings-row-title text-black">Test your remote</span>
+                    <span class="settings-row-desc text2">Press any button to see what it sends</span>
+                </span>
+                <span class="pill remote-key-pill remote-last-key" aria-live="polite">@_lastKey</span>
+            </div>
+        </div>
+
+        <h3 class="settings-label settings-sublabel">Buttons</h3>
+        <div class="settings-group">
+            @foreach (var (id, label) in RemoteActions)
+            {
+                var assigned = Screen.Current.RemoteKeys.GetValueOrDefault(id) ?? new List<string>();
+                var learning = _learning == id;
+                <div class="settings-row remote-key-row">
+                    <span class="settings-row-title text-black">@label</span>
+                    <span class="remote-key-controls">
+                        <span class="remote-key-list">
+                            @if (assigned.Count == 0)
+                            {
+                                <span class="text2 remote-key-none">No button</span>
+                            }
+                            @* GoBack and BrowserBack are both "Back" *@
+                            @foreach (var name in assigned.Select(KeyName).Distinct())
+                            {
+                                <span class="pill remote-key-pill">@name</span>
+                            }
+                        </span>
+                        <button type="button" class="settings-btn hover-dark remote-key-change @(learning ? "is-learning" : "")"
+                                aria-label="Change button for @label" @onclick="() => Learn(id)">
+                            @(learning ? "Press a button…" : "Change")
+                        </button>
+                    </span>
+                </div>
+            }
+            <div class="settings-row">
+                <span class="settings-row-text">
+                    <span class="settings-row-desc text2">Press Change, then the button on your remote. Press Change again to cancel.</span>
+                </span>
+                <button class="settings-btn hover-dark" type="button" @onclick="ResetKeys">Reset buttons</button>
+            </div>
+        </div>
+    </div>
+
+    @* Kitchen *@
+    <div class="settings-section">
+        <h2 class="settings-label">Kitchen</h2>
+        <div class="settings-group">
+            <div class="settings-row">
+                <span class="settings-row-text">
+                    <label class="settings-row-title text-black" for="set-warn">Warning after</label>
+                    <span class="settings-row-desc text2">Header turns yellow</span>
+                </span>
+                <span class="settings-number">
+                    <input class="settings-input" id="set-warn" type="number" min="1" max="120"
+                           value="@Screen.Current.WarnAfterMin" @onchange="e => SetMinutes(e, warn: true)" />
+                    <span class="text2">min</span>
+                </span>
+            </div>
+
+            <div class="settings-row">
+                <span class="settings-row-text">
+                    <label class="settings-row-title text-black" for="set-late">Late after</label>
+                    <span class="settings-row-desc text2">Header turns red</span>
+                </span>
+                <span class="settings-number">
+                    <input class="settings-input" id="set-late" type="number" min="1" max="180"
+                           value="@Screen.Current.LateAfterMin" @onchange="e => SetMinutes(e, warn: false)" />
+                    <span class="text2">min</span>
+                </span>
+            </div>
+
+            <SettingToggle Title="New order sound" Description="Short chime on this screen"
+                           @bind-Value="Screen.Current.Sound" @bind-Value:after="SoundChanged" />
+
+            @if (Kitchen.Status == CloverStatus.Demo)
+            {
+                <SettingToggle Title="Demo orders" Description="Fake orders every 25–60 sec on every screen, until Clover is connected"
+                               Value="Kitchen.DemoOrders" ValueChanged="Kitchen.SetDemoOrders" />
+            }
+        </div>
+    </div>
+
+    @* Data *@
+    <div class="settings-section">
+        <h2 class="settings-label">Data</h2>
+        <div class="settings-group">
+            <div class="settings-row">
+                <span class="settings-row-text">
+                    <span class="settings-row-title text-black">Clear past orders</span>
+                    <span class="settings-row-desc text2">For every screen</span>
+                </span>
+                <button class="settings-btn settings-btn-danger hover-dark" @onclick="@(() => ConfirmTap("clear", Kitchen.ClearHistory))">
+                    @(_confirming == "clear" ? "Tap again to confirm" : "Clear")
+                </button>
+            </div>
+            <div class="settings-row">
+                <span class="settings-row-text">
+                    <span class="settings-row-title text-black">Reset this screen</span>
+                    <span class="settings-row-desc text2">Text size, colors, remote buttons and sound</span>
+                </span>
+                <button class="settings-btn settings-btn-danger hover-dark" @onclick="@(() => ConfirmTap("reset", () => _ = Screen.ResetAsync()))">
+                    @(_confirming == "reset" ? "Tap again to confirm" : "Reset")
+                </button>
+            </div>
+        </div>
+    </div>
+</section>
 
 @code {
-    /* 
-     * This page represents the settings for the KDS. 
-     * TODO: add some settings like: order sounds, order card sizes,
-     * specific color .. etc. 
-     * 
-     */
+    private static readonly (double scale, string label)[] TextSizes = { (1, "Normal"), (1.15, "Large"), (1.3, "Extra large") };
 
+    private static readonly (string id, string label)[] RemoteActions =
+    {
+        ("left", "Order on the left"),
+        ("right", "Order on the right"),
+        ("up", "Move up"),
+        ("down", "Move down"),
+        ("select", "OK (bump card / check item)"),
+        ("bump", "Bump selected order"),
+        ("next", "Next order"),
+        ("prev", "Previous order"),
+        ("recall", "Recall last order"),
+        ("clear", "Hide selection"),
+    };
+
+    private static readonly Dictionary<string, string> KeyNames = new()
+    {
+        ["ArrowLeft"] = "◀", ["ArrowRight"] = "▶", ["ArrowUp"] = "▲", ["ArrowDown"] = "▼",
+        [" "] = "Space", ["Enter"] = "OK", ["Escape"] = "Esc", ["PageUp"] = "Page Up", ["PageDown"] = "Page Down",
+        ["GoBack"] = "Back", ["BrowserBack"] = "Back", ["Backspace"] = "Backspace", ["."] = ". (period)",
+    };
+
+    private DotNetObjectReference<Settings>? _self;
+    private string _lastKey = "Waiting…";
+    private string? _learning;      // remote action waiting for a button press
+    private string? _confirming;    // tap twice to confirm (no confirm() dialogs)
+    private CancellationTokenSource? _confirmTimeout;
+
+    private string CloverClass => Kitchen.Status switch
+    {
+        CloverStatus.Live => "connected",
+        CloverStatus.Connecting => "connecting",
+        CloverStatus.Error => "error",
+        _ => "demo"
+    };
+
+    private string CloverBadge => Kitchen.Status switch
+    {
+        CloverStatus.Live => "Connected",
+        CloverStatus.Connecting => "Connecting",
+        CloverStatus.Error => "Error",
+        _ => "Not connected"
+    };
+
+    protected override void OnInitialized()
+    {
+        Kitchen.Changed += Refresh;
+        Screen.Changed += Refresh;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+        _self = DotNetObjectReference.Create(this);
+        await JS.InvokeVoidAsync("KDS.remote.listen", _self);
+    }
+
+    private void Refresh() => InvokeAsync(StateHasChanged);
+
+    private Task Save() => Screen.SaveAsync();
+
+    private Task SetTextScale(double scale)
+    {
+        Screen.Current.TextScale = scale;
+        return Save();
+    }
+
+    private async Task SetMinutes(ChangeEventArgs e, bool warn)
+    {
+        var max = warn ? 120 : 180;
+        if (int.TryParse(e.Value?.ToString(), out var n) && n >= 1 && n <= max)
+        {
+            if (warn)
+            {
+                Screen.Current.WarnAfterMin = n;
+            }
+            else
+            {
+                Screen.Current.LateAfterMin = n;
+                // keep warning before late
+                if (n <= Screen.Current.WarnAfterMin) Screen.Current.WarnAfterMin = Math.Max(1, n - 1);
+            }
+        }
+        await Save(); // also puts back the last good value
+    }
+
+    private async Task SoundChanged()
+    {
+        await Save();
+        if (Screen.Current.Sound) await Screen.Beep();
+    }
+
+    private async Task Learn(string actionId)
+    {
+        _learning = _learning == actionId ? null : actionId; // press Change again to cancel
+        await JS.InvokeVoidAsync("KDS.remote.setLearning", _learning != null);
+    }
+
+    private async Task ResetKeys()
+    {
+        _learning = null;
+        await JS.InvokeVoidAsync("KDS.remote.setLearning", false);
+        await Screen.ResetRemoteKeysAsync();
+    }
+
+    // every key press on this page comes through here (from kds.js)
+    [JSInvokable]
+    public async Task OnRemoteKey(string key, string name)
+    {
+        _lastKey = name;
+        if (_learning != null)
+        {
+            var keys = Screen.Current.RemoteKeys;
+            // unassign it everywhere else
+            foreach (var id in keys.Keys.ToList())
+            {
+                keys[id] = keys[id].Where(k => k != key).ToList();
+            }
+            keys[_learning] = new List<string> { key };
+            _learning = null;
+            await JS.InvokeVoidAsync("KDS.remote.setLearning", false);
+            await Save();
+        }
+        StateHasChanged();
+    }
+
+    private static string KeyName(string key) =>
+        KeyNames.TryGetValue(key, out var name) ? name :
+        key.Length == 1 ? key.ToUpperInvariant() :
+        key.StartsWith("code:") ? "Code " + key[5..] : key;
+
+    private void ConfirmTap(string which, Action onConfirm)
+    {
+        _confirmTimeout?.Cancel();
+        if (_confirming == which)
+        {
+            _confirming = null;
+            onConfirm();
+            return;
+        }
+        _confirming = which;
+        _confirmTimeout = new CancellationTokenSource();
+        var token = _confirmTimeout.Token;
+        _ = Task.Delay(3000, token).ContinueWith(t =>
+        {
+            if (t.IsCanceled) return;
+            _confirming = null;
+            Refresh();
+        });
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        Kitchen.Changed -= Refresh;
+        Screen.Changed -= Refresh;
+        _confirmTimeout?.Cancel();
+        try
+        {
+            await JS.InvokeVoidAsync("KDS.remote.stop");
+        }
+        catch (JSDisconnectedException)
+        {
+        }
+        _self?.Dispose();
+    }
 }

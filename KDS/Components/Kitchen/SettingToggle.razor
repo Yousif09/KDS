@@ -1,0 +1,21 @@
+@* one On/Off row in settings *@
+<label class="settings-row">
+    <span class="settings-row-text">
+        <span class="settings-row-title text-black">@Title</span>
+        @if (!string.IsNullOrEmpty(Description))
+        {
+            <span class="settings-row-desc text2">@Description</span>
+        }
+    </span>
+    <input class="sr-only" type="checkbox" checked="@Value" @onchange="OnChange" />
+    <span class="pill pill-toggle" aria-hidden="true"></span>
+</label>
+
+@code {
+    [Parameter, EditorRequired] public string Title { get; set; } = "";
+    [Parameter] public string? Description { get; set; }
+    [Parameter] public bool Value { get; set; }
+    [Parameter] public EventCallback<bool> ValueChanged { get; set; }
+
+    private Task OnChange(ChangeEventArgs e) => ValueChanged.InvokeAsync(e.Value is true);
+}
