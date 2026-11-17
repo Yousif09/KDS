@@ -16,7 +16,7 @@ public class CloverServer
         _apiToken = config["Clover:ApiToken"] ?? "";
 
         // base url where we get all the information.
-        _httpClient.BaseAddress = new Uri("https://apisandbox.dev.clover.com/");
+        _httpClient.BaseAddress = new Uri("https://api.clover.com");
     }
 
     public string MerchantId => _merchantId;
