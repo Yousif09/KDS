@@ -1,0 +1,132 @@
+/* top bar */
+
+.topbar {
+	position: sticky;
+	top: 0;
+	z-index: 10;
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	padding: 12px 24px;
+	background-color: #1a1a1a;
+	color: #fff;
+}
+
+.topbar-left {
+	display: flex;
+	align-items: center;
+	gap: 16px;
+	flex-wrap: wrap;
+}
+
+.topbar-menu {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 40px; height: 40px;
+	margin-right: -4px;
+	color: #fff;
+	background-color: #333;
+	border-radius: 10px;
+	align-self: center;
+}
+
+.topbar-menu svg {
+	width: 20px; height: 20px;
+	fill: none;
+	stroke: currentColor;
+	stroke-width: 2;
+	stroke-linecap: round;
+}
+
+.topbar-title {
+	font-size: 20px;
+	font-weight: 700;
+	letter-spacing: -0.4px;
+}
+
+.topbar-stats {
+	font-size: 14px;
+	opacity: 0.7;
+}
+
+.topbar-right {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+
+.topbar-clock {
+	font-size: 18px;
+	font-weight: 500;
+	font-variant-numeric: tabular-nums;
+	margin-right: 8px;
+}
+
+.topbar-btn {
+	padding: 8px 14px;
+	font-size: 14px;
+	font-weight: 500;
+	color: #fff;
+	background-color: #333;
+	border-radius: 999px;
+}
+
+.topbar-btn:disabled {
+	opacity: 0.4;
+}
+
+.topbar-btn-primary {
+	background-color: var(--brand);
+	font-weight: 700;
+}
+
+
+/* board */
+
+.board {
+	position: relative;
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-start;
+	gap: 20px;               /* = COLUMN_GAP in kds.js */
+	padding: 24px;
+	min-height: calc(100vh - 64px);
+	background-color: var(--bg);
+}
+
+/* before the first layout pass */
+.board > .order-card {
+	width: 300px;
+}
+
+/* masonry: kds.js places each card in the shortest column */
+.board.is-masonry {
+	display: block;
+}
+
+.board.is-masonry > .order-card {
+	position: absolute;
+}
+
+.board-empty {
+	flex: 1;
+	margin-top: 20vh;
+	text-align: center;
+	color: var(--text-muted);
+}
+
+.board-empty-title {
+	font-size: 22px;
+	font-weight: 700;
+	color: var(--text);
+	margin-bottom: 4px;
+}
+
+@media (max-width: 600px) {
+	.topbar { padding: 12px 16px; }
+	.board { padding: 16px; }
+}
