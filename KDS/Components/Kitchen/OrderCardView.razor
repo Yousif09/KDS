@@ -1,0 +1,139 @@
+@inject KitchenService Kitchen
+@inject ScreenSettingsService Screen
+
+@{
+    var done = Order.DoneCount;
+    var total = Order.items.Count;
+    var complete = Order.IsComplete;
+    var pct = total == 0 ? 0 : done * 100 / total;
+}
+
+<article class="order-card @CardClasses" data-order-id="@Order.id" data-added="@Order.addedAt.ToUnixTimeMilliseconds()">
+    <header class="header">
+        <div class="header-order-info1">
+            <div class="header-order-info2">
+                <p class="header-text-order">Order #@Order.orderNumber</p>
+                <p class="header-text-group">@Screen.Clock(Order.time)</p>
+                <p class="header-timer">@TimerText</p>
+            </div>
+            <div class="header-badges">
+                <span class="order-type-tag order-type-@Order.type.Key">@Order.type.Label</span>
+                <span class="btn-payment-badges @(Order.paid ? "" : "is-unpaid")">
+                    <span class="btn-payment-badges-icon">
+                        @if (Order.paid)
+                        {
+                            <svg class="btn-payment-badges-graphic" viewBox="0 0 7 5" fill="none" aria-hidden="true">
+                                <path d="M0.6 2.31L2.31 4.03L5.74 0.6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                        }
+                        else
+                        {
+                            <svg class="btn-payment-badges-graphic" viewBox="0 0 6 6" fill="none" aria-hidden="true">
+                                <path d="M1 1L5 5M5 1L1 5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+                            </svg>
+                        }
+                    </span>
+                    <span class="btn-payment-badges-label">@(Order.paid ? "Paid" : "Unpaid")</span>
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <div class="order-card-progress">
+        <div class="order-card-container1" style="width: @(pct)%"></div>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(Order.customer) || !string.IsNullOrWhiteSpace(Order.note))
+    {
+        <div class="order-card-text">
+            @if (!string.IsNullOrWhiteSpace(Order.customer))
+            {
+                <p class="order-card-customer">@Order.customer</p>
+            }
+            @if (!string.IsNullOrWhiteSpace(Order.note))
+            {
+                <p class="order-card-note">@Order.note</p>
+            }
+        </div>
+    }
+
+    <button class="order-card-btn hover-dark text1" title="@(complete ? "Mark all items not done" : "Mark all items done")"
+            @onclick="() => Kitchen.ToggleAll(Order.id)">@done/@total</button>
+
+    <div class="order-card-container2">
+        @for (int i = 0; i < Order.items.Count; i++)
+        {
+            var index = i;
+            var item = Order.items[i];
+            <button type="button" class="order-item-row order-item-row@(i + 1) @(item.isComplete ? "is-done" : "")"
+                    aria-pressed="@(item.isComplete ? "true" : "false")"
+                    @onclick="() => Kitchen.ToggleItem(Order.id, index)">
+                <span class="order-item-row-btn-quantity text1 btn-light">@(item.isComplete ? "✓" : item.quantity.ToString())</span>
+                <span class="order-item-row-container">
+                    <span class="order-item-row-title text-black">@item.name</span>
+                    @if (!string.IsNullOrWhiteSpace(item.notes))
+                    {
+                        <span class="order-item-row-notes text2 @(item.IsAllergy ? "is-alert" : "")">@item.notes</span>
+                    }
+                    @if (item.modifiers.Any())
+                    {
+                        <span class="order-item-row-protein text2">@string.Join(", ", item.modifiers)</span>
+                    }
+                </span>
+            </button>
+        }
+    </div>
+
+    <button class="order-card-bump hover-dark" @onclick="() => Kitchen.Bump(Order.id)">@(complete ? "Bump order ✓" : "Bump order")</button>
+</article>
+
+@code {
+    [Parameter, EditorRequired] public OrderCard Order { get; set; } = default!;
+
+    // passed in by the board every second so the timers tick
+    [Parameter] public DateTimeOffset Now { get; set; }
+
+    private double Minutes => (Now - Order.time).TotalMinutes;
+
+    // 'ok' | 'warning' | 'late'
+    private string AgeState =>
+        Minutes >= Screen.Current.LateAfterMin ? "late" :
+        Minutes >= Screen.Current.WarnAfterMin ? "warning" : "ok";
+
+    private string CardClasses
+    {
+        get
+        {
+            var classes = new List<string>();
+            // slide in only when it just arrived
+            if ((Now - Order.addedAt).TotalSeconds < 3) classes.Add("is-new");
+            if (AgeState == "warning") classes.Add("is-warning");
+            if (AgeState == "late") classes.Add("is-late");
+            if (Order.IsComplete) classes.Add("is-complete");
+            return string.Join(" ", classes);
+        }
+    }
+
+    // timer method
+    private string TimerText
+    {
+        get
+        {
+            var timeSpan = Now - Order.time;
+
+            if (timeSpan.TotalSeconds < 0)
+            {
+                timeSpan = TimeSpan.Zero;
+            }
+
+            var time = $"{(int)timeSpan.TotalMinutes}:{timeSpan.Seconds:D2}";
+            if (!Screen.Current.StatusLabels || Order.IsComplete) return time;
+            return AgeState switch
+            {
+                "late" => $"LATE {time}",
+                "warning" => $"SOON {time}",
+                _ => time
+            };
+        }
+    }
+}

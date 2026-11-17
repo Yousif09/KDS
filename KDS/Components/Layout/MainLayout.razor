@@ -1,23 +1,84 @@
 ﻿@inherits LayoutComponentBase
+@implements IDisposable
+@inject ScreenSettingsService Screen
+@inject KitchenService Kitchen
+@inject NavigationManager Nav
+@inject IJSRuntime JS
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
+<div class="app @(Screen.Current.SidebarCollapsed ? "sidebar-collapsed" : "") @(_mobileOpen ? "sidebar-open" : "")">
+
+    <NavMenu />
+
+    <div class="sidebar-backdrop" @onclick="CloseMobile"></div>
+
+    <div class="app-main">
+        <TopBar OnToggleSidebar="ToggleSidebar" SidebarExpanded="SidebarExpanded" />
+        @Body
     </div>
-
-    <main>
-        <div class="top-row px-4">
-            <a href="https://github.com/Yousif09/KDS" target="_blank">About</a>
-        </div>
-
-        <article class="content px-4">
-            @Body
-        </article>
-    </main>
 </div>
+
+@* kds.js writes into this when the remote moves *@
+<p class="remote-hint" id="remote-hint" role="status" hidden></p>
 
 <div id="blazor-error-ui" data-nosnippet>
     An unhandled error has occurred.
     <a href="." class="reload">Reload</a>
     <span class="dismiss">🗙</span>
 </div>
+
+@code {
+    private bool _mobileOpen;
+    private bool _narrow;
+
+    private bool SidebarExpanded => _narrow ? _mobileOpen : !Screen.Current.SidebarCollapsed;
+
+    protected override void OnInitialized()
+    {
+        Screen.Changed += OnSettingsChanged;
+        Kitchen.OrdersArrived += OnOrdersArrived;
+        Nav.LocationChanged += OnLocationChanged;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender) await Screen.LoadAsync();
+    }
+
+    private async Task ToggleSidebar()
+    {
+        _narrow = await JS.InvokeAsync<bool>("KDS.isNarrow");
+        if (_narrow)
+        {
+            _mobileOpen = !_mobileOpen;
+        }
+        else
+        {
+            Screen.Current.SidebarCollapsed = !Screen.Current.SidebarCollapsed;
+            await Screen.SaveAsync();
+        }
+    }
+
+    private void CloseMobile() => _mobileOpen = false;
+
+    // close the drawer after picking a page
+    private void OnLocationChanged(object? sender, Microsoft.AspNetCore.Components.Routing.LocationChangedEventArgs e)
+    {
+        if (!_mobileOpen) return;
+        _mobileOpen = false;
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void OnSettingsChanged() => InvokeAsync(StateHasChanged);
+
+    private void OnOrdersArrived()
+    {
+        if (Screen.Loaded && Screen.Current.Sound) InvokeAsync(Screen.Beep);
+    }
+
+    public void Dispose()
+    {
+        Screen.Changed -= OnSettingsChanged;
+        Kitchen.OrdersArrived -= OnOrdersArrived;
+        Nav.LocationChanged -= OnLocationChanged;
+    }
+}

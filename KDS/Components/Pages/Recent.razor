@@ -1,21 +1,150 @@
 ﻿@page "/recent"
-@rendermode InteractiveServer
+@implements IDisposable
+@inject KitchenService Kitchen
+@inject ScreenSettingsService Screen
 
+<PageTitle>Past orders · Kitchen Display</PageTitle>
 
+@*
+ * This page represents all the recent orders that have been processed (bumped).
+ * Kept in memory on the server, last 200.
+ *@
 
-<PageTitle>Recent Orders</PageTitle>
+<section class="view history">
+    <div class="history-toolbar">
+        <label class="sr-only" for="history-search">Search past orders</label>
+        <input class="input history-search" id="history-search" type="search" placeholder="Search order #, customer or item"
+               @bind="_query" @bind:event="oninput" />
+        <div class="chip-group" role="group" aria-label="Filter by order type">
+            @foreach (var (key, label) in Filters)
+            {
+                <button class="chip" aria-pressed="@(_filter == key ? "true" : "false")" @onclick="() => _filter = key">@label</button>
+            }
+        </div>
+    </div>
 
-<h3> Recent Orders: </h3>
+    @if (_history.Count == 0)
+    {
+        <div class="history-list">
+            <div class="board-empty">
+                <p class="board-empty-title">No past orders yet</p>
+                <p>Bumped orders will be listed here.</p>
+            </div>
+        </div>
+    }
+    else
+    {
+        var shown = Shown();
+        <p class="history-summary">Showing @shown.Count of @_history.Count · Average ticket time @AverageTicket() min</p>
 
+        <div class="history-list">
+            @if (shown.Count == 0)
+            {
+                <p class="history-none">No orders match that search.</p>
+            }
+            @foreach (var entry in shown)
+            {
+                var order = entry.order;
+                var itemCount = order.items.Sum(i => i.quantity);
+                <article class="history-row" @key="order.id">
+                    <div class="history-row-main">
+                        <div class="history-row-info">
+                            <div class="history-row-who">
+                                <p class="history-row-number">#@order.orderNumber</p>
+                                <span class="order-type-tag order-type-@order.type.Key">@order.type.Label</span>
+                                @if (!order.paid)
+                                {
+                                    <span class="history-unpaid">Unpaid</span>
+                                }
+                                @if (!string.IsNullOrWhiteSpace(order.customer))
+                                {
+                                    <span class="history-row-customer">@order.customer</span>
+                                }
+                            </div>
+                            <p class="history-row-times">In @Screen.Clock(order.time) · Done @Screen.Clock(entry.bumpedAt) · @MinutesBetween(order.time, entry.bumpedAt)</p>
+                        </div>
+                        <button class="btn btn-small hover-dark" aria-label="Recall order @order.orderNumber to the board" @onclick="() => Kitchen.Recall(order.id)">Recall</button>
+                    </div>
 
+                    <details class="history-details">
+                        <summary class="history-summary-toggle">@itemCount item@(itemCount == 1 ? "" : "s")</summary>
+                        <ul class="history-items">
+                            @foreach (var item in order.items)
+                            {
+                                var extra = string.Join(" · ", item.modifiers.Append(item.notes ?? "").Where(x => !string.IsNullOrWhiteSpace(x)));
+                                <li class="history-item">
+                                    <span class="history-item-qty">@(item.quantity)×</span>
+                                    <span class="history-item-text">
+                                        <span class="history-item-name">@item.name</span>
+                                        @if (extra.Length > 0)
+                                        {
+                                            <span class="history-item-extra">@extra</span>
+                                        }
+                                    </span>
+                                </li>
+                            }
+                            @if (!string.IsNullOrWhiteSpace(order.note))
+                            {
+                                <li class="history-item history-item-note">Note: @order.note</li>
+                            }
+                        </ul>
+                    </details>
+                </article>
+            }
+        </div>
+    }
+</section>
 
 @code {
+    private static readonly (string key, string label)[] Filters =
+    {
+        ("all", "All"), ("pickup", "Pickup"), ("takeout", "Takeout"), ("dinein", "Dine in"), ("delivery", "Delivery"),
+    };
 
-    /*
-     * This page represents all the recent orders that have been processed. 
-     * TODO: Implement a time interval until they dissapear. Ex: last 30 minutes
-     * or 1 hour. 
-     */
+    private List<HistoryEntry> _history = new();
+    private string _query = "";
+    private string _filter = "all";
 
+    protected override void OnInitialized()
+    {
+        _history = Kitchen.History;
+        Kitchen.Changed += OnKitchenChanged;
+    }
 
+    // newest first
+    private List<HistoryEntry> Shown()
+    {
+        var query = _query.Trim();
+        return _history
+            .Where(e => _filter == "all" || e.order.type.Key == _filter)
+            .Where(e => query.Length == 0 || Haystack(e.order).Contains(query, StringComparison.OrdinalIgnoreCase))
+            .Reverse()
+            .ToList();
+    }
+
+    private static string Haystack(OrderCard order) =>
+        string.Join(" ", new[] { order.orderNumber, order.customer, order.note }.Concat(order.items.Select(i => i.name)));
+
+    private string AverageTicket()
+    {
+        var avg = (int)Math.Round(_history.Average(e => (e.bumpedAt - e.order.time).TotalMinutes));
+        return avg < 1 ? "<1" : avg.ToString();
+    }
+
+    private static string MinutesBetween(DateTimeOffset a, DateTimeOffset b)
+    {
+        var min = (int)Math.Max(0, Math.Round((b - a).TotalMinutes));
+        return min < 1 ? "<1 min" : $"{min} min";
+    }
+
+    private void OnKitchenChanged()
+    {
+        InvokeAsync(() =>
+        {
+            _history = Kitchen.History;
+            StateHasChanged();
+        });
+    }
+
+    public void Dispose() => Kitchen.Changed -= OnKitchenChanged;
 }

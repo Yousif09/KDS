@@ -1,30 +1,74 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">Taj Ali</a>
-    </div>
-</div>
+@implements IDisposable
+@inject KitchenService Kitchen
 
-<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
-
-<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
-    <nav class="nav flex-column">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
-            </NavLink>
-        </div>
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="Recent">
-                <span class="bi bi-arrow-clockwise-nav-menu" aria-hidden="true"></span> Recent
-            </NavLink>
-        </div>
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="Settings">
-                <span class="bi bi-gear-fill-nav-menu" aria-hidden="true"></span> Settings
-            </NavLink>
-        </div>
+<aside class="sidebar" id="sidebar" aria-label="Main navigation">
+    @* icons: Ecommerce Icons Pack (Figma community), gear drawn by us *@
+    <p class="sidebar-section-label">Menu</p>
+    <nav class="sidebar-nav">
+        <NavLink class="sidebar-link" href="" Match="NavLinkMatch.All" title="Live orders">
+            <svg class="sidebar-icon" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" clip-rule="evenodd" d="M10.2799 3.00311L5 3.00005V21H19L18.9991 11.7217C18.9991 11.501 18.98 11.2806 18.9437 11.0629C18.5798 8.88389 17.5184 7.41248 15.3394 7.77637L14 8.00005L14.2237 6.66063C14.26 6.44289 14.2783 6.22251 14.2783 6.00175C14.2783 3.79262 12.489 3.00311 10.2799 3.00311ZM7.75 7.00024C7.75 6.58603 8.08579 6.25024 8.5 6.25024H11C11.4142 6.25024 11.75 6.58603 11.75 7.00024C11.75 7.41445 11.4142 7.75024 11 7.75024H8.5C8.08579 7.75024 7.75 7.41445 7.75 7.00024ZM7.75 11.0002C7.75 10.586 8.08579 10.2502 8.5 10.2502H15.5C15.9142 10.2502 16.25 10.586 16.25 11.0002C16.25 11.4145 15.9142 11.7502 15.5 11.7502H8.5C8.08579 11.7502 7.75 11.4145 7.75 11.0002ZM7.75 14.0002C7.75 13.586 8.08579 13.2502 8.5 13.2502H15.5C15.9142 13.2502 16.25 13.586 16.25 14.0002C16.25 14.4145 15.9142 14.7502 15.5 14.7502H8.5C8.08579 14.7502 7.75 14.4145 7.75 14.0002ZM7.75 17.0002C7.75 16.586 8.08579 16.2502 8.5 16.2502H15.5C15.9142 16.2502 16.25 16.586 16.25 17.0002C16.25 17.4145 15.9142 17.7502 15.5 17.7502H8.5C8.08579 17.7502 7.75 17.4145 7.75 17.0002ZM14.25 3.2509C16.51 4.01076 18.0797 5.65657 18.7428 7.97212C18.6024 7.76306 18.4437 7.56515 18.2644 7.38229C17.5498 6.65359 16.6297 6.28611 15.594 6.28155L15.594 6.27729C15.594 5.00043 15.1066 3.96206 14.25 3.2509Z"/></svg>
+            <span class="sidebar-link-label">Live orders</span>
+            <span class="sidebar-count @(_count == 0 ? "is-empty" : "")">@_count</span>
+        </NavLink>
+        <NavLink class="sidebar-link" href="recent" title="Past orders">
+            <svg class="sidebar-icon" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" clip-rule="evenodd" d="M11.0547 1.16795C10.7182 0.943594 10.2796 0.944053 9.94356 1.16911C9.6075 1.39417 9.4401 1.79951 9.51942 2.19612L9.79194 3.55873C6.44755 4.51707 4 7.59777 4 11.2501C4 13.4701 4.90556 15.4805 6.36499 16.9287C6.75701 17.3178 7.39017 17.3153 7.7792 16.9233C8.16822 16.5313 8.16579 15.8981 7.77377 15.5091C6.67723 14.4209 6 12.9156 6 11.2501C6 8.56868 7.75899 6.29806 10.186 5.52921L10.5194 7.19612C10.5987 7.59272 10.9092 7.9025 11.3059 7.98099C11.7027 8.05948 12.1077 7.89123 12.3321 7.5547L14.3321 4.5547C14.6384 4.09517 14.5142 3.4743 14.0547 3.16795L11.0547 1.16795ZM18.635 6.54029C18.243 6.15126 17.6098 6.15369 17.2208 6.54571C16.8318 6.93773 16.8342 7.57089 17.2262 7.95991C18.3228 9.04808 19 10.5535 19 12.2189C19 14.9198 17.2154 17.2039 14.7611 17.9563L14.4806 16.5539C14.4013 16.1573 14.0908 15.8475 13.6941 15.769C13.2973 15.6905 12.8923 15.8588 12.6679 16.1953L10.6679 19.1953C10.3616 19.6548 10.4858 20.2757 10.9453 20.5821L13.9453 22.5821C14.2818 22.8064 14.7204 22.8059 15.0564 22.5809C15.3925 22.3558 15.5599 21.9505 15.4806 21.5539L15.1549 19.9253C18.5265 18.9846 21 15.8906 21 12.2189C21 9.99891 20.0944 7.98857 18.635 6.54029Z"/></svg>
+            <span class="sidebar-link-label">Past orders</span>
+        </NavLink>
     </nav>
-</div>
 
+    <p class="sidebar-section-label">Settings &amp; Clover</p>
+    <nav class="sidebar-nav">
+        <NavLink class="sidebar-link" href="settings" title="Settings">
+            <svg class="sidebar-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <mask id="m-gear"><rect width="24" height="24" fill="#fff"/><circle cx="12" cy="12" r="3.25" fill="#000"/></mask>
+					<g mask="url(#m-gear)"><circle cx="12" cy="12" r="7.5"/><rect x="10.25" y="1.75" width="3.5" height="5" rx="1.25" transform="rotate(0 12 12)"/><rect x="10.25" y="1.75" width="3.5" height="5" rx="1.25" transform="rotate(45 12 12)"/><rect x="10.25" y="1.75" width="3.5" height="5" rx="1.25" transform="rotate(90 12 12)"/><rect x="10.25" y="1.75" width="3.5" height="5" rx="1.25" transform="rotate(135 12 12)"/><rect x="10.25" y="1.75" width="3.5" height="5" rx="1.25" transform="rotate(180 12 12)"/><rect x="10.25" y="1.75" width="3.5" height="5" rx="1.25" transform="rotate(225 12 12)"/><rect x="10.25" y="1.75" width="3.5" height="5" rx="1.25" transform="rotate(270 12 12)"/><rect x="10.25" y="1.75" width="3.5" height="5" rx="1.25" transform="rotate(315 12 12)"/></g>
+            </svg>
+            <span class="sidebar-link-label">Settings</span>
+        </NavLink>
+        @* clover status, not a NavLink so it never shows as the current page *@
+        <a class="sidebar-link sidebar-clover" href="settings" title="Clover: @StatusText.detail">
+            <span class="sidebar-icon-wrap">
+                <svg class="sidebar-icon" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" clip-rule="evenodd" d="M12.4858 2.42855C12.2057 2.19048 11.7944 2.19048 11.5143 2.42855L1.51428 10.9285C1.19867 11.1968 1.1603 11.6701 1.42856 11.9857C1.69683 12.3013 2.17015 12.3397 2.48575 12.0715L5.00002 9.93433V19C5.00002 19.5523 5.44773 20 6.00002 20H18C18.5523 20 19 19.5523 19 19V9.93433L21.5143 12.0715C21.8299 12.3397 22.3032 12.3013 22.5715 11.9857C22.8397 11.6701 22.8014 11.1968 22.4858 10.9285L12.4858 2.42855Z"/></svg>
+                <span class="status-dot is-@StatusClass"></span>
+            </span>
+            <span class="sidebar-link-label">Clover</span>
+            <span class="sidebar-status is-@StatusClass">@StatusText.label</span>
+        </a>
+    </nav>
+    <p class="sr-only">@StatusText.detail</p>
+</aside>
+
+@code {
+    private int _count;
+
+    protected override void OnInitialized()
+    {
+        _count = Kitchen.ActiveOrders.Count;
+        Kitchen.Changed += OnKitchenChanged;
+    }
+
+    // css classes from the original design: demo / connecting / connected / error
+    private string StatusClass => Kitchen.Status switch
+    {
+        CloverStatus.Live => "connected",
+        CloverStatus.Connecting => "connecting",
+        CloverStatus.Error => "error",
+        _ => "demo"
+    };
+
+    private (string label, string detail) StatusText => Kitchen.Status switch
+    {
+        CloverStatus.Live => ("Live", $"Connected to {Kitchen.MerchantId}"),
+        CloverStatus.Connecting => ("…", "Connecting to Clover"),
+        CloverStatus.Error => ("Error", Kitchen.StatusMessage ?? "Connection problem"),
+        _ => ("Demo", "Clover not connected")
+    };
+
+    private void OnKitchenChanged()
+    {
+        _count = Kitchen.ActiveOrders.Count;
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose() => Kitchen.Changed -= OnKitchenChanged;
+}

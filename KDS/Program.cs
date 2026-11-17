@@ -1,6 +1,5 @@
 using KDS.Components;
-using System.Net.Http.Headers;
-using System.Net.Http.Json;
+using KDS.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,8 +8,15 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 
-// registering the clover service here: 
+// registering the clover service here:
 builder.Services.AddHttpClient<CloverServer>();
+
+// orders + bump state shared by every screen, and the loop that checks clover
+builder.Services.AddSingleton<KitchenService>();
+builder.Services.AddHostedService(sp => sp.GetRequiredService<KitchenService>());
+
+// per-screen settings (stored in the browser)
+builder.Services.AddScoped<ScreenSettingsService>();
 
 
 var app = builder.Build();

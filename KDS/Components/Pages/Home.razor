@@ -1,196 +1,89 @@
 ﻿@page "/"
-@rendermode InteractiveServer
-@implements IDisposable // disposes of memory that needs to be closed
-@inject CloverServer CloverService
+@implements IAsyncDisposable // disposes of memory that needs to be closed
+@inject KitchenService Kitchen
+@inject ScreenSettingsService Screen
+@inject IJSRuntime JS
 
-<PageTitle>Home</PageTitle>
+<PageTitle>Live orders · Kitchen Display</PageTitle>
 
-
-
-@* If our current order is NOT null, AND if our order is showing then display all that info.
-    Otherwise, showOrder is set to false and nothing appears on that conditional case.
-*@
-    
-@if (ActiveOrders.Any())
-{
-    <div class="orders-grid">
+@* kds.js positions the cards into masonry columns (each card goes in the shortest column) *@
+<main class="board view" @ref="_board" data-board aria-live="polite">
+    @if (ActiveOrders.Any())
+    {
         @foreach (var order in ActiveOrders)
         {
-            <div class="order-card" @key="order.id">
-
-                <div class="order-header">
-
-                    <span class="service-type">@order.service</span>
-                    <span class="order-timer">@GetFormattedTime(order.time)</span>
-                    <button class="order-button" @onclick="() => CompleteOrder(order)">Done</button>
-                </div>
-
-                <div class="order-body">
-
-                    @foreach (var item in order.items)
-                    {
-                        <div class="order-item">
-                            <div class="item-main">
-                                <span class="item-qty">(@(item.quantity)) </span>
-                                <span class="item-name">@item.name</span>
-                            </div>
-
-
-
-                            @if (item.modifiers.Any())
-                            {
-                                <ul class="item-modifiers">
-                                    @foreach (var modifier in item.modifiers)
-                                    {
-                                        <li> @modifier</li>
-                                    }
-                                </ul>
-                            }
-                        </div>
-                    }
-                </div>
-            </div>
-
-
+            <OrderCardView @key="order.id" Order="order" Now="_now" />
         }
-    </div>
-}
-
+    }
+    else
+    {
+        <div class="board-empty">
+            <p class="board-empty-title">All caught up</p>
+            <p>New orders will show up here.</p>
+        </div>
+    }
+</main>
 
 @code {
-
-
     private List<OrderCard> ActiveOrders = new();
-    private HashSet<string> CompletedOrderIds = new();  
     private System.Timers.Timer? _timer;
-    
+    private DateTimeOffset _now = DateTimeOffset.UtcNow;
+    private ElementReference _board;
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
-
-
-        await LoadOrders(); 
-
-
+        LoadOrders();
+        Kitchen.Changed += OnKitchenChanged;
+        Screen.Changed += OnKitchenChanged;
 
         _timer = new System.Timers.Timer(1000);
         _timer.Elapsed += ElapsedTimer;
         _timer.Start();
     }
 
-
-    private async Task LoadOrders()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        var fetchedOrders = await CloverService.GetRecentOrders();
+        if (firstRender) await JS.InvokeVoidAsync("KDS.board.attach", _board);
+    }
 
-        // only showing the orders that aren't done: 
-        ActiveOrders = fetchedOrders
-        .Where(o => !CompletedOrderIds.Contains(o.id))
-        .ToList(); 
+    // oldest first, that's the order the masonry fills in
+    private void LoadOrders()
+    {
+        ActiveOrders = Kitchen.ActiveOrders;
+    }
+
+    private void OnKitchenChanged()
+    {
+        InvokeAsync(() =>
+        {
+            LoadOrders();
+            StateHasChanged();
+        });
     }
 
     private void ElapsedTimer(object? sender, System.Timers.ElapsedEventArgs e)
     {
-
-        // checks if the state of the page has changed at all.. meaning its refreshing every 
-        // second checking for an order.
-        InvokeAsync(StateHasChanged);
-    }
-
-    private void CompleteOrder(OrderCard order)
-    {
-        CompletedOrderIds.Add(order.id);
-        ActiveOrders.Remove(order); 
-    }
-
-
-
-
-
-
-    // timer method
-    private string GetFormattedTime(DateTimeOffset orderTime)
-    {
-
-        var timeSpan = DateTimeOffset.UtcNow - orderTime;
-
-        if(timeSpan.TotalSeconds < 0)
+        // re-render every second so the timers and colors update
+        InvokeAsync(() =>
         {
-            timeSpan = TimeSpan.Zero;
-        }
-
-        return $"{(int)timeSpan.TotalMinutes}:{timeSpan.Seconds:D2}";
+            _now = DateTimeOffset.UtcNow;
+            StateHasChanged();
+        });
     }
 
-
-
-    // disposing of the memory allocated from the timer object. 
-    public void Dispose()
+    // disposing of the memory allocated from the timer object.
+    public async ValueTask DisposeAsync()
     {
         _timer?.Dispose();
+        Kitchen.Changed -= OnKitchenChanged;
+        Screen.Changed -= OnKitchenChanged;
+        try
+        {
+            await JS.InvokeVoidAsync("KDS.board.detach");
+        }
+        catch (JSDisconnectedException)
+        {
+            // tab already closed
+        }
     }
-
-    // represents a single order card that will pop up on the menu. 
-    public class OrderCard
-    {
-        public string id {get; set;} = string.Empty;
-        public DateTimeOffset time {get; set;}
-        public string? service {get; set;} // to go or dine in..
-        public OrderStatus orderStatus {get; set;}
-        public List<OrderItem> items { get; set; } = new();  // a list of our order items
-        public int itemCount {get; set;}
-    }
-
-    // class that represents a singular order item and what it will compose of
-    public class OrderItem
-    {
-        public int quantity {get; set;}
-        public string? name {get; set;}
-        public List<string> modifiers { get; set; } = new(); // no tomatoes/onions .. etc
-        public bool isComplete {get; set;} // is the order complete or not, if so action the button
-    }
-
-
-    // Enum to determine the status of an order
-    public enum OrderStatus
-    {
-        inProgress,
-        ready
-    }
-
-
-
-    // clovers response: 
-    public class CloverResponse
-    {
-        public List<CloverOrder>Elements {get; set;} = new();
-    }
-
-    public class CloverOrder
-    {
-        public long createdTime {get; set;}
-        public CloverOrderType? orderType {get; set;}
-        public CloverLineItems? lineItems {get; set;}
-        public string? id { get; set; } // unique id to each order 
-
-    }
-
-    public class CloverOrderType
-    {
-        public string? label { get; set; }
-    }
-
-    public class CloverLineItems
-    {
-        public List<CloverLineItem> Elements {get; set;} = new(); 
-    }
-
-    public class CloverLineItem
-    {
-        public string? name { get; set; }
-        public string? note {get; set;} // any notes
-        public int? unitQty {get; set;} 
-    }
-
-    
 }
