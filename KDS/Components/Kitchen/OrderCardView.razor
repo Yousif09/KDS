@@ -73,7 +73,7 @@
                     <span class="order-item-row-title text-black">@item.name</span>
                     @if (!string.IsNullOrWhiteSpace(item.notes))
                     {
-                        <span class="order-item-row-notes text2 @(item.IsAllergy ? "is-alert" : "")">@item.notes</span>
+                        <span class="order-item-row-notes text2">@item.notes</span>
                     }
                     @if (item.modifiers.Any())
                     {
@@ -84,7 +84,7 @@
         }
     </div>
 
-    <button class="order-card-bump hover-dark" @onclick="() => Kitchen.Bump(Order.id)">@(complete ? "Bump order ✓" : "Bump order")</button>
+    <button class="order-card-bump hover-dark" @onclick="() => Kitchen.Bump(Order.id)">@(complete ? "Done ✓" : "Done")</button>
 </article>
 
 @code {

@@ -30,8 +30,6 @@ public class OrderItem
     public List<string> modifiers { get; set; } = new(); // clover modifiers: garlic sauce, extra rice..
     public bool isComplete { get; set; }
 
-    public bool IsAllergy => notes != null && notes.Contains("allerg", StringComparison.OrdinalIgnoreCase);
-
     // same name + note + modifiers = same row
     public string GroupKey => $"{name}|{notes}|{string.Join(",", modifiers)}";
 }
@@ -55,7 +53,7 @@ public record OrderType(string Key, string Label)
     private static readonly (Regex match, string key, string label)[] Rules =
     {
         (new Regex(@"pick\s*-?\s*up|online", RegexOptions.IgnoreCase), "pickup", "Pickup"),
-        (new Regex(@"to\s*-?\s*go|take\s*-?\s*out", RegexOptions.IgnoreCase), "takeout", "Takeout"),
+        (new Regex(@"to\s*-?\s*go|take\s*-?\s*out", RegexOptions.IgnoreCase), "to go", "to go"),
         (new Regex(@"deliver|doordash|uber|grubhub", RegexOptions.IgnoreCase), "delivery", "Delivery"),
         (new Regex(@"dine|for here|eat in", RegexOptions.IgnoreCase), "dinein", "Dine in"),
     };
@@ -73,7 +71,11 @@ public record OrderType(string Key, string Label)
 }
 
 
-// clovers response:
+
+
+
+
+// clovers response (is then formulated into c# objects):
 public class CloverResponse
 {
     public List<CloverOrder> Elements { get; set; } = new();

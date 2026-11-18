@@ -15,7 +15,7 @@ public enum CloverStatus
 // It also checks Clover for new orders every few seconds.
 public class KitchenService : BackgroundService
 {
-    private static readonly TimeSpan PollEvery = TimeSpan.FromSeconds(10);
+    private static readonly TimeSpan PollEvery = TimeSpan.FromSeconds(5);
     private const int HistoryLimit = 200;
     private const int MaxDemoOrders = 12;
 

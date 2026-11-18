@@ -29,7 +29,7 @@
 
 
     // Representing a singular order card
-
+      
 
     private List<OrderCard> ActiveOrders = new();
     private System.Timers.Timer? _timer;
@@ -77,6 +77,8 @@
         });
     }
 
+    // method to dispose of an order after a certain time interval:
+    
     // disposing of the memory allocated from the timer object.
     public async ValueTask DisposeAsync()
     {
