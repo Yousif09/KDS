@@ -62,10 +62,12 @@
         if (firstRender) await JS.InvokeVoidAsync("KDS.board.attach", _board);
     }
 
-    // oldest first, that's the order the masonry fills in
+    // newest orders first:
     private void LoadOrders()
     {
-        ActiveOrders = Kitchen.ActiveOrders;
+        ActiveOrders = Kitchen.ActiveOrders.
+        OrderByDescending(o => o.time)
+                          .ToList();
     }
 
     private void OnKitchenChanged()
@@ -87,9 +89,7 @@
         });
     }
 
-    // method to dispose of an order after a certain time interval:
-    //TODO:
-    
+
     // disposing of the memory allocated from the timer object.
     public async ValueTask DisposeAsync()
     {
