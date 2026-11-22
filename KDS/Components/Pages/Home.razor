@@ -12,7 +12,15 @@
     {
         @foreach (var order in ActiveOrders)
         {
-            <OrderCardView @key="order.id" Order="order" Now="_now" />
+            // add conditional: if time NOT >/ 35 minutes then display it:
+            var minutesElapsed = (_now - order.time).TotalMinutes;
+            if(minutesElapsed < 35)
+            {
+                <OrderCardView @key="order.id" Order="order" Now="_now" />
+            }
+
+            
+            
         }
     }
     else
@@ -29,12 +37,13 @@
 
 
     // Representing a singular order card
-      
 
     private List<OrderCard> ActiveOrders = new();
     private System.Timers.Timer? _timer;
     private DateTimeOffset _now = DateTimeOffset.UtcNow;
     private ElementReference _board;
+
+   
 
     protected override void OnInitialized()
     {
@@ -42,6 +51,7 @@
         Kitchen.Changed += OnKitchenChanged;
         Screen.Changed += OnKitchenChanged;
 
+        // initializing an order in 1 second. 
         _timer = new System.Timers.Timer(1000);
         _timer.Elapsed += ElapsedTimer;
         _timer.Start();
@@ -78,6 +88,7 @@
     }
 
     // method to dispose of an order after a certain time interval:
+    //TODO:
     
     // disposing of the memory allocated from the timer object.
     public async ValueTask DisposeAsync()
