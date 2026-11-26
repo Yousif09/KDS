@@ -7,7 +7,7 @@
 	width: 100%;
 	padding-bottom: 12px;
 	text-align: left;
-	border-bottom: 1px solid #f0f0f0;
+	border-bottom: 2px solid #a9a6a6;
 	border-radius: 6px;
 	cursor: pointer;
 	transition: opacity 0.2s ease;
@@ -37,6 +37,7 @@
 
 .order-item-row-title {
 	align-self: stretch;
+	font-size: 21px; 
 }
 
 .order-item-row-notes {
@@ -68,5 +69,8 @@
 	text-decoration: line-through;
 }
 
-
+.order-item-row.is-done .order-item-row-btn-quantity {
+	color: #fff;
+	background-color: var(--done);
+}
 /* end order-item-row */

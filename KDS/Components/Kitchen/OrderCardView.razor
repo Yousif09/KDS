@@ -68,7 +68,7 @@
             <button type="button" class="order-item-row order-item-row@(i + 1) @(item.isComplete ? "is-done" : "")"
                     aria-pressed="@(item.isComplete ? "true" : "false")"
                     @onclick="() => Kitchen.ToggleItem(Order.id, index)">
-                <span class="order-item-row-btn-quantity text1 btn-light">@(item.isComplete ? "✓" : item.quantity.ToString())</span>
+                <span class="order-item-row-btn-quantity text1">@(item.isComplete ? "✓" : item.quantity.ToString())</span>
                 <span class="order-item-row-container">
                     <span class="order-item-row-title text-black">@item.name</span>
                     @if (!string.IsNullOrWhiteSpace(item.notes))

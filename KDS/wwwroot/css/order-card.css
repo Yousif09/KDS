@@ -28,9 +28,9 @@
 }
 
 /* age states */
-.order-card.is-warning .header { background-color: var(--warning); }
+/*.order-card.is-warning .header { background-color: var(--warning); }
 .order-card.is-late .header    { background-color: var(--late); }
-.order-card.is-late            { animation: late-pulse 1.6s ease-in-out infinite; }
+.order-card.is-late            { animation: late-pulse 1.6s ease-in-out infinite; }*/
 
 @keyframes late-pulse {
 	0%, 100% { box-shadow: 0 0 0 0 rgba(198, 40, 40, 0.0), 0px 4px 24px 0px rgba(0, 0, 0, 0.08); }
@@ -175,6 +175,7 @@
 	width: 0; height: 3px;
 	background-color: var(--brand);
 	transition: width 0.25s ease, background-color 0.25s ease;
+
 }
 
 .order-card.is-complete .order-card-container1 {
@@ -184,7 +185,7 @@
 .order-card-text {
 	flex-shrink: 0;
 	display: flex;
-	flex-direction: column;
+	flex-direction: column; 
 	gap: 2px;
 	padding: 12px 20px;
 	border-bottom: 1px solid var(--line); 
@@ -227,7 +228,6 @@
 	display: flex;
 	flex-direction: column;
 	gap: 12px;
-	font-size: 36px; 
 }
 
 /* bump button */
