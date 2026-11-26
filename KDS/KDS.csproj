@@ -7,4 +7,12 @@
     <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Content Remove="wwwroot\lib\order-sound.mp3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="wwwroot\lib\order-sound.mp3" />
+  </ItemGroup>
+
 </Project>

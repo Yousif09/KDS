@@ -10,13 +10,16 @@
 <main class="board view" @ref="_board" data-board aria-live="polite">
     @if (ActiveOrders.Any())
     {
+
         @foreach (var order in ActiveOrders)
         {
-            // add conditional: if time NOT >/ 35 minutes then display it:
+
+        
             var minutesElapsed = (_now - order.time).TotalMinutes;
             if(minutesElapsed < 35)
             {
                 <OrderCardView @key="order.id" Order="order" Now="_now" />
+                
             }
 
             
@@ -55,6 +58,7 @@
         _timer = new System.Timers.Timer(1000);
         _timer.Elapsed += ElapsedTimer;
         _timer.Start();
+
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)

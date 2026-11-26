@@ -97,20 +97,21 @@
 
   let audioCtx = null;
 
+
+
+  // KDS ORDER SOUND:
+    const customSound = new Audio('lib/order-sound.mp3'); 
+    customSound.volume = 1.0; 
+
+    // javascript function to make it beep:
   function beep() {
-    try {
-      audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
-      [880, 1175].forEach((freq, i) => {
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        const start = audioCtx.currentTime + i * 0.15;
-        osc.frequency.value = freq;
-        gain.gain.setValueAtTime(0.2, start);
-        gain.gain.exponentialRampToValueAtTime(0.001, start + 0.3);
-        osc.connect(gain).connect(audioCtx.destination);
-        osc.start(start);
-        osc.stop(start + 0.3);
-      });
+      try {
+
+          customSound.currentTime = 0; 
+          customSound.play(); 
+
+
+      
     } catch (e) {
       // no audio
     }
