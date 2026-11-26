@@ -12,6 +12,8 @@
 	padding: 12px 24px;
 	background-color: #1a1a1a;
 	color: #fff;
+	background-color: green; 
+	
 }
 
 .topbar-left {
@@ -80,7 +82,7 @@
 }
 
 .topbar-btn-primary {
-	background-color: var(--brand);
+	background-color: black;
 	font-weight: 700;
 }
 
