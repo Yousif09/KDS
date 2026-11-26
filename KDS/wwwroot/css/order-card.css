@@ -160,7 +160,7 @@
 .header-timer {
 	margin-left: auto;
 	padding: 2px 8px;
-	font-size: calc(14px * var(--text-scale));
+	font-size: 25px; 
 	font-weight: 700;
 	font-variant-numeric: tabular-nums;
 	background-color: rgba(0, 0, 0, 0.18);
@@ -203,6 +203,7 @@
 	font-size: calc(12px * var(--text-scale));
 	font-weight: 700;
 	line-height: 1.333;
+	font-size: 20px;
 }
 
 .order-card-btn {
