@@ -100,7 +100,7 @@
 
 
   // KDS ORDER SOUND:
-    const customSound = new Audio('lib/order-sound.mp3'); 
+    const customSound = new Audio('lib/light-sound.mp3'); 
     customSound.volume = 1.0; 
 
     // javascript function to make it beep:

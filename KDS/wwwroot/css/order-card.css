@@ -70,21 +70,9 @@
 	cursor: default;
 }
 
-.btn-payment-badges-icon {
-	position: relative;
-	width: 12px; height: 12px;
-	flex-shrink: 0;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	background-color: rgba(46, 125, 50, 0.12);
-	border: 1px solid var(--done);
-	border-radius: 50%;
-	overflow: hidden;
-}
 
 .btn-payment-badges-graphic {
-	width: 6px; height: 5px;
+	width: 6px; height: 10px;
 }
 
 .btn-payment-badges-label {
@@ -114,9 +102,9 @@
 }
 
 .order-type-pickup   { background-color: #1565c0; }
-.order-type-takeout  { background-color: #6a1b9a; }
+.order-type-takeout  { background-color: darkblue; }
 .order-type-delivery { background-color: #00796b; }
-.order-type-dinein   { background-color: #37474f; }
+.order-type-dinein   { background-color: darkred; }
 
 /* unpaid variant */
 .btn-payment-badges.is-unpaid {
